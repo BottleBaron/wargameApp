@@ -37,14 +37,13 @@ export default function Counter({ title }: CounterProps) {
 const localStyles = StyleSheet.create({
     counterOuterShell: {
         display: 'flex',
-        flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
+        flex: 1,
         //NOTE: Temporary color
         backgroundColor: '#eebfff',
-        flexWrap: 'wrap'
     },
     counterContainer: {
-        display: "flex",
         flexDirection: "row",
         justifyContent: "center",
     },
