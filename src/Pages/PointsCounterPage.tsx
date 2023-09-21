@@ -16,8 +16,8 @@ export default function PointsCounterPage() {
 
 const localStyles = StyleSheet.create({
     pageLayout: {
-        display: "flex",
-        justifyContent: "space-between",
+        flexDirection: "row",
+        flexWrap: "wrap",
         flex: 1,
     },
 });

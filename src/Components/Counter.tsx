@@ -1,3 +1,4 @@
+import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import {
     Button,
@@ -14,19 +15,21 @@ export default function Counter({ title }: CounterProps) {
     const [count, setCount] = useState(0);
 
     const incrementCount = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         setCount(count + 1);
     }
 
     const decrementCount = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         if (count > 0) setCount(count - 1)
     }
 
     return (
         <View style={localStyles.counterOuterShell}>
-            <Text style={localStyles.titleFont}>{title}</Text>
+            <Text style={localStyles.titleText}>{title}</Text>
             <View style={localStyles.counterContainer}>
                 <Button title="-" onPress={decrementCount} />
-                <Text>{count}</Text>
+                <Text style={localStyles.counterText}>{count}</Text>
                 <Button title="+" onPress={incrementCount} />
             </View>
         </View>
@@ -36,19 +39,25 @@ export default function Counter({ title }: CounterProps) {
 
 const localStyles = StyleSheet.create({
     counterOuterShell: {
-        display: 'flex',
+        height: '50%',
+        width: '50%',
+        borderWidth: 1,
+        borderColor: 'gray',
         justifyContent: 'center',
         alignItems: 'center',
-        flex: 1,
-        //NOTE: Temporary color
-        backgroundColor: '#eebfff',
     },
     counterContainer: {
         flexDirection: "row",
         justifyContent: "center",
+        alignItems: 'center',
     },
-    titleFont: {
+    titleText: {
         fontSize: 24,
         fontWeight: 'bold',
-    }
+    },
+    counterText: {
+        fontSize: 18,
+        fontWeight: '400',
+        marginHorizontal: 10,
+    },
 });
