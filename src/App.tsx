@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import DicePage from './Pages/DicePage';
+import AccelerometerTrial from './Pages/MotionPlaceholder';
 import PointsCounterPage from './Pages/PointsCounterPage';
 
 
@@ -32,6 +33,7 @@ export default function App() {
         <Tab.Screen name="Dice" component={DicePage} options={{
           tabBarIcon: (props) => <MaterialCommunityIcons name="dice-6" size={24} color="black" />
         }} />
+        <Tab.Screen name="Test" component={AccelerometerTrial} />
       </Tab.Navigator>
     </NavigationContainer >
   );

@@ -6,12 +6,15 @@ import {
     Text,
     View
 } from "react-native";
+import { useKeepAwake } from 'expo-keep-awake';
+
 
 interface CounterProps {
     title: string
 }
 
 export default function Counter({ title }: CounterProps) {
+    useKeepAwake();
     const [count, setCount] = useState(0);
 
     const incrementCount = () => {

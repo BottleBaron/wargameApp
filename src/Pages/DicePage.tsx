@@ -1,6 +1,9 @@
+import Slider from "@react-native-community/slider";
 import * as Haptics from 'expo-haptics';
-import React, { useState } from "react";
-import { Button, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { useKeepAwake } from 'expo-keep-awake';
+import React, { useEffect, useState } from "react";
+import { Button, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { D6Die, dice } from "../../assets/DiceData";
 import styles from "../Styling/Styles";
 
@@ -11,8 +14,19 @@ function getRandomD6Number() {
 
 
 export default function DicePage() {
+    useKeepAwake();
     const [number, setNumber] = useState('');
     const [rolledDice, setRolledDice] = useState<D6Die[]>([]);
+    const [rollTotal, setRollTotal] = useState(0);
+    const [rollThreshold, setRollThreshold] = useState(2);
+    const [passingDice, setPassingDice] = useState(0);
+    const [useReRollOne, setUseRerollOne] = useState(false);
+    const [useRerollFail, setUseRerollFail] = useState(false);
+
+    useEffect(() => {
+        CalculateRolledTotal();
+        CalculatePassingCount();
+    }, [rolledDice])
 
     const rollTheDice = () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -21,20 +35,56 @@ export default function DicePage() {
         const convertedInput = parseInt(number);
         const newRolledDice = [];
 
+        let rerolledCount = 0;
+        let rerollModeAlert = "";
         for (let i = 0; i < convertedInput; i++) {
-            const randomResult = getRandomD6Number();
+            let randomResult = getRandomD6Number();
+
+            if (useRerollFail && randomResult < rollThreshold) {
+                randomResult = getRandomD6Number();
+                rerolledCount++;
+                rerollModeAlert = "fails";
+            }
+            else if (useReRollOne && randomResult === 1) {
+                randomResult = getRandomD6Number();
+                rerolledCount++;
+                rerollModeAlert = "ones";
+            }
+
             const result = dice.find(die => die.dieNumber === randomResult)
 
             if (result) {
+
                 newRolledDice.push(result);
             }
         }
 
         setRolledDice(newRolledDice);
         setNumber('');
+        if (rerolledCount > 0) alert(`Rerolled ${rerolledCount} dice using rerolls for ${rerollModeAlert}`);
     }
 
+    function CalculateRolledTotal() {
 
+        let total = 0;
+
+
+        rolledDice.forEach(die => {
+            total += die.dieNumber;
+        });
+
+        setRollTotal(total);
+    };
+
+    function CalculatePassingCount() {
+        let passedTotal = 0;
+
+        rolledDice.forEach(die => {
+            if (die.dieNumber >= rollThreshold) passedTotal++;
+        })
+
+        setPassingDice(passedTotal);
+    }
 
     return (
         <View style={styles.container}>
@@ -49,23 +99,61 @@ export default function DicePage() {
                     ))}
                 </ScrollView>
             </SafeAreaView>
-            <View style={localStyles.inputContainer}>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={setNumber}
-                    placeholder="Amount of D6"
-                    inputMode="numeric"
-                    value={number}
-                    defaultValue="1" />
-                <Button title="Roll" onPress={rollTheDice} />
+            <View style={localStyles.OuterUIContainer}>
+                <View style={localStyles.resultContainer}>
+                    <Text style={localStyles.resultText}>Total: {rollTotal}</Text>
+                    <Text style={localStyles.resultText}>Passing Dice: {passingDice}</Text>
+                </View>
+                <View style={localStyles.InterfaceContainer}>
+                    <View style={{ flex: 1 }}>
+                        <TextInput
+                            style={localStyles.textInput}
+                            onChangeText={setNumber}
+                            placeholder="Amount of D6"
+                            inputMode="numeric"
+                            value={number}
+                            defaultValue="1" />
+                        <Button title="Roll" onPress={rollTheDice} />
+                    </View>
+
+                    <View style={{ flex: 1, alignItems: 'center', flexDirection: 'column', marginTop: 20 }}>
+                        <Text>Threshold: {rollThreshold}+</Text>
+                        <Slider style={{ width: '100%', height: 40 }}
+                            minimumValue={2}
+                            maximumValue={6}
+                            thumbTintColor="#2296f3"
+                            value={rollThreshold}
+                            onValueChange={setRollThreshold}
+                            step={1}
+                        />
+
+                        <View>
+                            <BouncyCheckbox size={25}
+                                disabled={useRerollFail}
+                                style={{ marginVertical: 5 }}
+                                fillColor='#2296f3'
+                                text="Reroll 1s"
+                                textStyle={{ textDecorationLine: "none" }}
+                                iconStyle={{ borderColor: "red" }}
+                                onPress={(value) => setUseRerollOne(value)} />
+                            <BouncyCheckbox
+                                style={{ marginVertical: 5 }}
+                                fillColor='#2296f3'
+                                text="Reroll Fail"
+                                textStyle={{ textDecorationLine: "none" }}
+                                iconStyle={{ borderColor: "red" }}
+                                onPress={(value) => setUseRerollFail(value)} />
+                        </View>
+                    </View>
+                </View>
             </View>
         </View >
     );
 
-    //Haptics
-    //Accelerometer
-    //Devicemotion
-    //KeepAwake
+    //X Haptics
+    //Accelerometer on reroll
+    //X KeepAwake
+    //X Slider 
 }
 
 const localStyles = StyleSheet.create({
@@ -82,12 +170,31 @@ const localStyles = StyleSheet.create({
         width: 100,
         height: 100,
     },
-    inputContainer: {
+    OuterUIContainer: {
         flex: 2,
+        flexDirection: 'column',
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 3,
         borderColor: 'gray',
+    },
+    textInput: {
+        flexDirection: 'column',
+        borderWidth: 1,
+        margin: 10,
+    },
+    resultContainer: {
+        flexDirection: 'row',
+        height: '20%',
+    },
+    InterfaceContainer: {
+        flex: 1,
+        flexDirection: 'row',
+    },
+    resultText: {
+        marginHorizontal: 10,
+        fontSize: 24,
+        fontWeight: 'bold',
     }
 });
