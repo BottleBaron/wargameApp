@@ -1,9 +1,9 @@
 import Slider from "@react-native-community/slider";
+import Checkbox from "expo-checkbox";
 import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import React, { useEffect, useState } from "react";
 import { Button, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { D6Die, dice } from "../../assets/DiceData";
 import styles from "../Styling/Styles";
 
@@ -27,6 +27,10 @@ export default function DicePage() {
         CalculateRolledTotal();
         CalculatePassingCount();
     }, [rolledDice])
+
+    useEffect(() => {
+        if (useRerollFail) setUseRerollOne(false);
+    }, [useRerollFail]);
 
     const rollTheDice = () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -116,9 +120,9 @@ export default function DicePage() {
                         <Button title="Roll" onPress={rollTheDice} />
                     </View>
 
-                    <View style={{ flex: 1, alignItems: 'center', flexDirection: 'column', marginTop: 20 }}>
-                        <Text>Threshold: {rollThreshold}+</Text>
-                        <Slider style={{ width: '100%', height: 40 }}
+                    <View style={{ flex: 1, alignItems: 'center', flexDirection: 'column', marginTop: 5 }}>
+                        <Text style={{ fontSize: 18 }}>Threshold: {rollThreshold}+</Text>
+                        <Slider style={{ width: '100%', height: 25 }}
                             minimumValue={2}
                             maximumValue={6}
                             thumbTintColor="#2296f3"
@@ -128,21 +132,14 @@ export default function DicePage() {
                         />
 
                         <View>
-                            <BouncyCheckbox size={25}
-                                disabled={useRerollFail}
-                                style={{ marginVertical: 5 }}
-                                fillColor='#2296f3'
-                                text="Reroll 1s"
-                                textStyle={{ textDecorationLine: "none" }}
-                                iconStyle={{ borderColor: "red" }}
-                                onPress={(value) => setUseRerollOne(value)} />
-                            <BouncyCheckbox
-                                style={{ marginVertical: 5 }}
-                                fillColor='#2296f3'
-                                text="Reroll Fail"
-                                textStyle={{ textDecorationLine: "none" }}
-                                iconStyle={{ borderColor: "red" }}
-                                onPress={(value) => setUseRerollFail(value)} />
+                            <View style={{ flexDirection: 'row' }}>
+                                <Checkbox color='#2296f3' value={useReRollOne} onValueChange={setUseRerollOne} disabled={useRerollFail} />
+                                <Text style={{ marginLeft: 20, fontSize: 18 }}>Reroll 1s</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Checkbox color='#2296f3' value={useRerollFail} onValueChange={setUseRerollFail} />
+                                <Text style={{ marginLeft: 20, fontSize: 18 }}>Reroll Fails</Text>
+                            </View>
                         </View>
                     </View>
                 </View>
@@ -151,7 +148,8 @@ export default function DicePage() {
     );
 
     //X Haptics
-    //Accelerometer on reroll
+    //TODO: REMOVE Accelerometer  
+    // TODO: Implement expo-checkbox
     //X KeepAwake
     //X Slider 
 }
@@ -171,7 +169,7 @@ const localStyles = StyleSheet.create({
         height: 100,
     },
     OuterUIContainer: {
-        flex: 2,
+        flex: 2.5,
         flexDirection: 'column',
         width: '100%',
         justifyContent: 'center',
@@ -187,10 +185,12 @@ const localStyles = StyleSheet.create({
     resultContainer: {
         flexDirection: 'row',
         height: '20%',
+        alignItems: 'center',
     },
     InterfaceContainer: {
         flex: 1,
         flexDirection: 'row',
+        alignItems: 'center'
     },
     resultText: {
         marginHorizontal: 10,
