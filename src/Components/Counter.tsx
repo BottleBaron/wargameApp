@@ -1,4 +1,5 @@
 import * as Haptics from "expo-haptics";
+import { useKeepAwake } from 'expo-keep-awake';
 import { useState } from "react";
 import {
     Button,
@@ -6,7 +7,6 @@ import {
     Text,
     View
 } from "react-native";
-import { useKeepAwake } from 'expo-keep-awake';
 
 
 interface CounterProps {
@@ -31,9 +31,13 @@ export default function Counter({ title }: CounterProps) {
         <View style={localStyles.counterOuterShell}>
             <Text style={localStyles.titleText}>{title}</Text>
             <View style={localStyles.counterContainer}>
-                <Button title="-" onPress={decrementCount} />
+                <View style={localStyles.buttonContainer}>
+                    <Button title="-" onPress={decrementCount} />
+                </View>
                 <Text style={localStyles.counterText}>{count}</Text>
-                <Button title="+" onPress={incrementCount} />
+                <View style={localStyles.buttonContainer}>
+                    <Button title="+" onPress={incrementCount} />
+                </View>
             </View>
         </View>
     );
@@ -42,10 +46,10 @@ export default function Counter({ title }: CounterProps) {
 
 const localStyles = StyleSheet.create({
     counterOuterShell: {
-        height: '50%',
+        height: '40%',
         width: '50%',
-        borderWidth: 1,
-        borderColor: 'gray',
+        borderWidth: 2,
+        borderColor: 'grey',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -59,8 +63,14 @@ const localStyles = StyleSheet.create({
         fontWeight: 'bold',
     },
     counterText: {
-        fontSize: 18,
-        fontWeight: '400',
+        fontSize: 20,
+        color: '#555555',
+        fontWeight: 'bold',
         marginHorizontal: 10,
+    },
+    buttonContainer: {
+        justifyContent: 'center',
+        height: 50,
+        width: 50,
     },
 });
