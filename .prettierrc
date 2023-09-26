@@ -1,7 +1,9 @@
 {
   "tabWidth": 4,
   "useTabs": true,
+  "proseWrap": "never",
+  "singleAttributePerLine": false,
+  "endOfLine": "crlf",
   "bracketSameLine": true,
-  "jsxBracketSameLine": true,
-  "jsxSingleQuote": true
+  "printWidth": 140
 }

@@ -5,7 +5,7 @@ export interface SecondaryObjective {
     name: string
     objectiveRule: string
     isCumulative: boolean
-    isSelected: boolean
+    cumulativeCount?: number
     subRules: ObjectiveSubRule[]
 }
 
@@ -20,7 +20,6 @@ export const secondaryObjectives: SecondaryObjective[] = [
         name: 'Area Denial',
         objectiveRule: 'Have a unit wholly within 6" of the center and:',
         isCumulative: false,
-        isSelected: false,
         subRules: [
             {
                 title: 'No enemy units within 3" of the center',
@@ -37,7 +36,6 @@ export const secondaryObjectives: SecondaryObjective[] = [
         name: 'Assasination',
         objectiveRule: '',
         isCumulative: false,
-        isSelected: false,
         subRules: [
             {
                 title: 'Destroyed 1+ enemy characters',
@@ -54,7 +52,6 @@ export const secondaryObjectives: SecondaryObjective[] = [
         name: 'A Tempting Target',
         objectiveRule: 'Scored at the end of your turn',
         isCumulative: false,
-        isSelected: false,
         subRules: [
             {
                 title: 'Control the selected objective',
@@ -67,7 +64,6 @@ export const secondaryObjectives: SecondaryObjective[] = [
         name: 'Behind Enemy Lines',
         objectiveRule: 'Scored at the end of your turn',
         isCumulative: false,
-        isSelected: false,
         subRules: [
             {
                 title: 'Have 1 unit in the enemy deployment zone',
@@ -84,7 +80,6 @@ export const secondaryObjectives: SecondaryObjective[] = [
         name: 'Bring It Down',
         objectiveRule: 'Gain 1 additional point if any of the conditions below are met',
         isCumulative: true,
-        isSelected: false,
         subRules: [
             {
                 title: 'Have 1 unit in the enemy deployment zone',
