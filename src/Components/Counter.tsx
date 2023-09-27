@@ -1,5 +1,4 @@
 import * as Haptics from "expo-haptics";
-import { useKeepAwake } from 'expo-keep-awake';
 import { useState } from "react";
 import {
     Button,
@@ -11,10 +10,10 @@ import {
 
 interface CounterProps {
     title: string
+    isPointsCounter : boolean
 }
 
-export default function Counter({ title }: CounterProps) {
-    useKeepAwake();
+export default function Counter({ title, isPointsCounter}: CounterProps ) {
     const [count, setCount] = useState(0);
 
     const incrementCount = () => {

@@ -3,9 +3,13 @@ import Checkbox from "expo-checkbox";
 import React, { useContext, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SecondaryObjective, secondaryObjectives } from "../../assets/ObjectivesData";
-import { usePointsContext } from "../Utilities/PointsContext";
+import { PointsAction, usePointsContext } from "../Utilities/PointsContext";
 
-export default function ObjectivesInterface() {
+interface ObjectivesInterfaceProps {
+	isYourPoints: boolean
+}
+
+export default function ObjectivesInterface({isYourPoints} : ObjectivesInterfaceProps) {
 	const [selectOverlayVisible, setSelectOverlayVisible] = useState(false);
 	const [detailsOverlayVisible, setDetailsOverlayVisible] = useState(false);
 	const [activeObjectives, setActiveObjectives] = useState<SecondaryObjective[]>([]);
@@ -28,17 +32,15 @@ export default function ObjectivesInterface() {
 		subRuleIndex: number;
 	}
 
-	// TODO: Add points context
-	// TODO: Add ChangeablePoints
-	// TODO: Add New STATED Way to get description
+	// TODO: Add random function
 
+	//
 	const DetailsOverlay = () => {
-
 		const currentDetailsObjective = activeObjectives.find((m) => m.id === detailsTargetId);
 
 		return (
 			<Overlay
-				overlayStyle={{ height: "auto", justifyContent: "center" }}
+				overlayStyle={{ height: "auto", justifyContent: "center", padding: 30 }}
 				onBackdropPress={() => toggleDetailsOverlay(0)}
 				isVisible={detailsOverlayVisible}>
 				<View style={{ justifyContent: "center", alignItems: "center" }}>
@@ -54,7 +56,7 @@ export default function ObjectivesInterface() {
 										Points per completion: {subrule.pointsPerCompletion}pts
 									</Text>
 								</View>
-								<View style={{ padding: 10, marginLeft: 10 }}>
+								<View style={{ marginLeft: 10 }}>
 									<PointsInterface objective={currentDetailsObjective} subRuleIndex={index} />
 								</View>
 							</View>
@@ -65,43 +67,59 @@ export default function ObjectivesInterface() {
 		);
 	};
 
+	// Buttons to increase points based on submissions
 	const PointsInterface = ({ objective, subRuleIndex }: PointsInterFaceProps) => {
+		const decreaseCumulativePoints = () => {
+			if (
+				typeof objective.subRules[subRuleIndex]?.cumulativeCount === "number" &&
+				objective.subRules[subRuleIndex]?.cumulativeCount !== 0
+			) {
+				objective.subRules[subRuleIndex].cumulativeCount = (objective.subRules[subRuleIndex].cumulativeCount ?? 0) - 1;
+				dispatch({ type: "SUBTRACT_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS"});
+			}
+		};
 
-		const decreaseCumulativePoints = () => {};
-
-		const increaseCumulativePoints = () => {};
+		const increaseCumulativePoints = () => {
+			if (typeof objective.subRules[subRuleIndex]?.cumulativeCount === "number") {
+				objective.subRules[subRuleIndex].cumulativeCount = (objective.subRules[subRuleIndex].cumulativeCount ?? 0) + 1;
+				dispatch({ type: "ADD_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS"});
+			}
+		};
 
 		const toggleGainedPoints = () => {
-			
-			objective.subRules[subRuleIndex].isChecked = !objective.subRules[subRuleIndex].isChecked
-			setActiveObjectives([...activeObjectives.filter(o => o.id !== objective.id), objective]);
+			objective.subRules[subRuleIndex].isChecked = !objective.subRules[subRuleIndex].isChecked;
+			setActiveObjectives([...activeObjectives.filter((o) => o.id !== objective.id), objective]);
 
 			if (objective.subRules[subRuleIndex].isChecked) {
-				dispatch({ type: "ADD_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion });
+				dispatch({ type: "ADD_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS" });
 			} else {
-				dispatch({type: "SUBTRACT_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion});
+				dispatch({ type: "SUBTRACT_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS" });
 			}
 		};
 
 		if (objective.isCumulative && objective.subRules[subRuleIndex]) {
+			if (!objective.subRules[subRuleIndex].cumulativeCount) {
+				objective.subRules[subRuleIndex].cumulativeCount = 0;
+			}
+
 			return (
 				<View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-					<View>
-						<Button title="-" />
+					<View style={{ padding: 5 }}>
+						<Button title="-" onPress={decreaseCumulativePoints} />
 					</View>
-					<Text>{}</Text>
-					<View>
-						<Button title="+" />
+					<Text>{objective.subRules[subRuleIndex].cumulativeCount}</Text>
+					<View style={{ padding: 5 }}>
+						<Button title="+" onPress={increaseCumulativePoints} />
 					</View>
 				</View>
 			);
-		} else if(objective.subRules[subRuleIndex]){
-			if(!objective.subRules[subRuleIndex].isChecked){
+		} else if (objective.subRules[subRuleIndex]) {
+			if (!objective.subRules[subRuleIndex].isChecked) {
 				objective.subRules[subRuleIndex].isChecked = false;
 			}
 
 			return (
-				<View>
+				<View style={{ padding: 5 }}>
 					<Checkbox value={objective.subRules[subRuleIndex].isChecked} onValueChange={toggleGainedPoints} />
 				</View>
 			);
@@ -129,27 +147,31 @@ export default function ObjectivesInterface() {
 		}
 	};
 
+	// Generates three random objectives
 	const randomizeObjectives = () => {
-		const randomizedObjectives: SecondaryObjective[] = [];
+		let randomizedObjectives: SecondaryObjective[] = [];
 
-		for (let i = 0; i < 3; i++) {
+		let i = 0;
+		while (randomizedObjectives.length < 3) {
 			const randomIndex = Math.floor(Math.random() * secondaryObjectives.length) + 1;
-			console.log(randomIndex);
-			const randomObjective = secondaryObjectives.find((m) => m.id === randomIndex);
+			const random = secondaryObjectives.find((o) => o.id === randomIndex);
 
-			if (randomObjective) {
+			if (random) {
 				if (
-					!discardedObjectives.some((m) => m.id === randomObjective.id) &&
-					!activeObjectives.some((m) => m.id === randomObjective.id)
+					!discardedObjectives.some((m) => m.id === random.id) &&
+					!activeObjectives.some((m) => m.id === random.id) &&
+					!randomizedObjectives.some((m) => m.id === random.id)
 				) {
-					randomizedObjectives.push(randomObjective);
+					randomizedObjectives.push(random);
+					console.log(random);
 				} else {
-					console.log("item not found");
+					if (i > 50) break;
+					else i++;
 				}
-			} else console.log("error");
+			}
 		}
 
-		setActiveObjectives([...activeObjectives, ...randomizedObjectives]);
+		setActiveObjectives([...randomizedObjectives]);
 	};
 
 	return (

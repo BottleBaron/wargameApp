@@ -1,14 +1,20 @@
 import { StyleSheet, Text, View } from "react-native";
 import Counter from "../Components/Counter";
 import ObjectivesInterface from "../Components/ObjectivesInterface";
+import { usePointsContext } from "../Utilities/PointsContext";
+import { useKeepAwake } from 'expo-keep-awake';
+
 
 
 export default function PointsCounterPage() {
+    useKeepAwake();
+    const {state, dispatch} = usePointsContext();
 
     return (
         <View style={{ flex: 1 }}>
             <View style={localStyles.headerText}>
-                <Text>GameTracker</Text>
+                <Text>{state.points[0]}</Text>
+                <Text>{state.points[1]}</Text>
             </View>
             <View style={localStyles.pageLayout}>
                 <View style={localStyles.headerText}>
@@ -16,7 +22,7 @@ export default function PointsCounterPage() {
                 </View>
                 <Counter title="Command Points" />
                 <Counter title="Objective Points" />
-                <ObjectivesInterface />
+                <ObjectivesInterface isYourPoints={true}/>
             </View>
             <View style={localStyles.pageLayout}>
                 <View style={localStyles.headerText}>
@@ -24,7 +30,7 @@ export default function PointsCounterPage() {
                 </View>
                 <Counter title="Command Points" />
                 <Counter title="Objective Points" />
-                <ObjectivesInterface />
+                <ObjectivesInterface isYourPoints={false} />
             </View>
         </View>
     );

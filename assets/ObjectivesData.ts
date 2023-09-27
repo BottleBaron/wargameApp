@@ -85,10 +85,12 @@ export const secondaryObjectives: SecondaryObjective[] = [
             {
                 title: 'Have 1 unit in the enemy deployment zone',
                 pointsPerCompletion: 5,
+                cumulativeCount: 0
             },
             {
                 title: 'Have 2+ units in the enemy deployment zone',
                 pointsPerCompletion: 5,
+                cumulativeCount: 0
             },
         ],
     },
