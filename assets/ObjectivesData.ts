@@ -5,13 +5,14 @@ export interface SecondaryObjective {
     name: string
     objectiveRule: string
     isCumulative: boolean
-    cumulativeCount?: number
     subRules: ObjectiveSubRule[]
 }
 
 export interface ObjectiveSubRule {
     title: string
     pointsPerCompletion: number
+    isChecked?: boolean
+    cumulativeCount?: number
 }
 
 export const secondaryObjectives: SecondaryObjective[] = [
