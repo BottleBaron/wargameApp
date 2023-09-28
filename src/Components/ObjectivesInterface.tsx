@@ -1,15 +1,15 @@
 import { Overlay } from "@rneui/themed";
 import Checkbox from "expo-checkbox";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SecondaryObjective, secondaryObjectives } from "../../assets/ObjectivesData";
-import { PointsAction, usePointsContext } from "../Utilities/PointsContext";
+import { usePointsContext } from "../Utilities/PointsContext";
 
 interface ObjectivesInterfaceProps {
-	isYourPoints: boolean
+	isYourPoints: boolean;
 }
 
-export default function ObjectivesInterface({isYourPoints} : ObjectivesInterfaceProps) {
+export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfaceProps) {
 	const [selectOverlayVisible, setSelectOverlayVisible] = useState(false);
 	const [detailsOverlayVisible, setDetailsOverlayVisible] = useState(false);
 	const [activeObjectives, setActiveObjectives] = useState<SecondaryObjective[]>([]);
@@ -32,9 +32,6 @@ export default function ObjectivesInterface({isYourPoints} : ObjectivesInterface
 		subRuleIndex: number;
 	}
 
-	// TODO: Add random function
-
-	//
 	const DetailsOverlay = () => {
 		const currentDetailsObjective = activeObjectives.find((m) => m.id === detailsTargetId);
 
@@ -75,14 +72,22 @@ export default function ObjectivesInterface({isYourPoints} : ObjectivesInterface
 				objective.subRules[subRuleIndex]?.cumulativeCount !== 0
 			) {
 				objective.subRules[subRuleIndex].cumulativeCount = (objective.subRules[subRuleIndex].cumulativeCount ?? 0) - 1;
-				dispatch({ type: "SUBTRACT_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS"});
+				dispatch({
+					type: "SUBTRACT_POINTS",
+					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
+					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
+				});
 			}
 		};
 
 		const increaseCumulativePoints = () => {
 			if (typeof objective.subRules[subRuleIndex]?.cumulativeCount === "number") {
 				objective.subRules[subRuleIndex].cumulativeCount = (objective.subRules[subRuleIndex].cumulativeCount ?? 0) + 1;
-				dispatch({ type: "ADD_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS"});
+				dispatch({
+					type: "ADD_POINTS",
+					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
+					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
+				});
 			}
 		};
 
@@ -91,9 +96,17 @@ export default function ObjectivesInterface({isYourPoints} : ObjectivesInterface
 			setActiveObjectives([...activeObjectives.filter((o) => o.id !== objective.id), objective]);
 
 			if (objective.subRules[subRuleIndex].isChecked) {
-				dispatch({ type: "ADD_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS" });
+				dispatch({
+					type: "ADD_POINTS",
+					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
+					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
+				});
 			} else {
-				dispatch({ type: "SUBTRACT_POINTS", payload: objective.subRules[subRuleIndex].pointsPerCompletion, target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS" });
+				dispatch({
+					type: "SUBTRACT_POINTS",
+					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
+					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
+				});
 			}
 		};
 
@@ -149,29 +162,21 @@ export default function ObjectivesInterface({isYourPoints} : ObjectivesInterface
 
 	// Generates three random objectives
 	const randomizeObjectives = () => {
-		let randomizedObjectives: SecondaryObjective[] = [];
-
 		let i = 0;
-		while (randomizedObjectives.length < 3) {
+		while (true) {
 			const randomIndex = Math.floor(Math.random() * secondaryObjectives.length) + 1;
 			const random = secondaryObjectives.find((o) => o.id === randomIndex);
 
 			if (random) {
-				if (
-					!discardedObjectives.some((m) => m.id === random.id) &&
-					!activeObjectives.some((m) => m.id === random.id) &&
-					!randomizedObjectives.some((m) => m.id === random.id)
-				) {
-					randomizedObjectives.push(random);
-					console.log(random);
+				if (!discardedObjectives.some((m) => m.id === random.id) && !activeObjectives.some((m) => m.id === random.id)) {
+					toggleActiveMission(random);
+					break;
 				} else {
-					if (i > 50) break;
+					if (i > 20) break;
 					else i++;
 				}
 			}
 		}
-
-		setActiveObjectives([...randomizedObjectives]);
 	};
 
 	return (
