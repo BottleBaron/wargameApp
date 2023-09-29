@@ -79,10 +79,7 @@ export default function DicePage() {
 
 		setRolledDice(newRolledDice);
 		setNumber("");
-		if (rerolledCount > 0)
-			alert(
-				`Rerolled ${rerolledCount} dice using rerolls for ${rerollModeAlert}`
-			);
+		if (rerolledCount > 0) alert(`Rerolled ${rerolledCount} dice using rerolls for ${rerollModeAlert}`);
 	};
 
 	function CalculateRolledTotal() {
@@ -111,15 +108,10 @@ export default function DicePage() {
 				<ScrollView contentContainerStyle={localStyles.diceOuterShell}>
 					{rolledDice.map((die, index) => (
 						<View key={index} style={localStyles.diceContainer}>
-							<TouchableWithoutFeedback
-								onPress={Keyboard.dismiss}>
+							<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 								<Image
 									source={{ uri: die.image }}
-									onError={() =>
-										alert(
-											`Error loading image for die ${die.dieNumber}`
-										)
-									}
+									onError={() => alert(`Error loading image for die ${die.dieNumber}`)}
 									style={localStyles.diceImage}
 								/>
 							</TouchableWithoutFeedback>
@@ -129,28 +121,24 @@ export default function DicePage() {
 			</SafeAreaView>
 			<KeyboardAvoidingView
 				keyboardVerticalOffset={110}
-				behavior={Platform.OS === "ios" ? "padding" : "height"}
+				behavior={Platform.OS === "ios" ? "padding" : undefined}
 				style={localStyles.OuterUIContainer}>
 				<View style={localStyles.resultContainer}>
-					<Text style={localStyles.resultText}>
-						Total: {rollTotal}
-					</Text>
-					<Text style={localStyles.resultText}>
-						Passing Dice: {passingDice}
-					</Text>
+					<Text style={localStyles.resultText}>Total: {rollTotal}</Text>
+					<Text style={localStyles.resultText}>Passing Dice: {passingDice}</Text>
 				</View>
 				<View style={localStyles.InterfaceContainer}>
 					<View style={{ flex: 1 }}>
 						<TextInput
 							style={localStyles.textInput}
 							onChangeText={setNumber}
-							placeholder='Amount of D6'
-							inputMode='numeric'
+							placeholder="Amount of D6"
+							inputMode="numeric"
 							value={number}
-							textAlign='center'
-							defaultValue='1'
+							textAlign="center"
+							defaultValue="1"
 						/>
-						<Button title='Roll' onPress={rollTheDice} />
+						<Button title="Roll" onPress={rollTheDice} />
 					</View>
 
 					<View
@@ -160,14 +148,12 @@ export default function DicePage() {
 							flexDirection: "column",
 							marginTop: 5,
 						}}>
-						<Text style={{ fontSize: 18 }}>
-							Threshold: {rollThreshold}+
-						</Text>
+						<Text style={{ fontSize: 18 }}>Threshold: {rollThreshold}+</Text>
 						<Slider
 							style={{ width: "100%", height: 25 }}
 							minimumValue={2}
 							maximumValue={6}
-							thumbTintColor='#2296f3'
+							thumbTintColor="#2296f3"
 							value={rollThreshold}
 							onValueChange={setRollThreshold}
 							step={1}
@@ -175,25 +161,12 @@ export default function DicePage() {
 
 						<View>
 							<View style={{ flexDirection: "row" }}>
-								<Checkbox
-									color='#2296f3'
-									value={useReRollOne}
-									onValueChange={setUseRerollOne}
-									disabled={useRerollFail}
-								/>
-								<Text style={{ marginLeft: 20, fontSize: 18 }}>
-									Reroll 1s
-								</Text>
+								<Checkbox color="#2296f3" value={useReRollOne} onValueChange={setUseRerollOne} disabled={useRerollFail} />
+								<Text style={{ marginLeft: 20, fontSize: 18 }}>Reroll 1s</Text>
 							</View>
 							<View style={{ flexDirection: "row" }}>
-								<Checkbox
-									color='#2296f3'
-									value={useRerollFail}
-									onValueChange={setUseRerollFail}
-								/>
-								<Text style={{ marginLeft: 20, fontSize: 18 }}>
-									Reroll Fails
-								</Text>
+								<Checkbox color="#2296f3" value={useRerollFail} onValueChange={setUseRerollFail} />
+								<Text style={{ marginLeft: 20, fontSize: 18 }}>Reroll Fails</Text>
 							</View>
 						</View>
 					</View>

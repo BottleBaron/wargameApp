@@ -14,13 +14,13 @@ export default function App() {
 				<Tab.Navigator
 					screenOptions={{
 						headerStyle: {
-							backgroundColor: "#ade879",
+							backgroundColor: "#d4d4d4",
 						},
 						headerTitleStyle: {
 							fontWeight: "bold",
 						},
 						tabBarStyle: {
-							backgroundColor: "#ade879",
+							backgroundColor: "#d4d4d4",
 						},
 						tabBarLabelStyle: {
 							fontWeight: "bold",
@@ -28,7 +28,7 @@ export default function App() {
 						},
 					}}>
 					<Tab.Screen
-						name="Counter"
+						name="Game Tracker"
 						component={PointsCounterPage}
 						options={{
 							tabBarIcon: (props) => <MaterialCommunityIcons name="sword-cross" size={24} color="black" />,

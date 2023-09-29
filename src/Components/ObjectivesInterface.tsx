@@ -92,10 +92,19 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 		};
 
 		const toggleGainedPoints = () => {
-			objective.subRules[subRuleIndex].isChecked = !objective.subRules[subRuleIndex].isChecked;
-			setActiveObjectives([...activeObjectives.filter((o) => o.id !== objective.id), objective]);
+			setActiveObjectives(
+				activeObjectives.map((o) => {
+					if (o.id === objective.id) {
+						const copy = JSON.parse(JSON.stringify(o)) as SecondaryObjective;
+						copy.subRules[subRuleIndex].isChecked = !copy.subRules[subRuleIndex].isChecked;
+						return copy;
+					}
 
-			if (objective.subRules[subRuleIndex].isChecked) {
+					return o;
+				})
+			);
+
+			if (!objective.subRules[subRuleIndex].isChecked) {
 				dispatch({
 					type: "ADD_POINTS",
 					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
@@ -160,6 +169,7 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 		}
 	};
 
+	//TODO: Filter out non avaliable items and random with avaliable
 	// Generates three random objectives
 	const randomizeObjectives = () => {
 		let i = 0;
