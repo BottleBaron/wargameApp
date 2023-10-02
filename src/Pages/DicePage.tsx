@@ -55,6 +55,7 @@ export default function DicePage() {
 		const convertedInput = parseInt(number);
 		const newRolledDice = [];
 
+		//TODO: Use toast instead
 		let rerolledCount = 0;
 		let rerollModeAlert = "";
 		for (let i = 0; i < convertedInput; i++) {

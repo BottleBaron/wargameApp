@@ -3,7 +3,7 @@ import Checkbox from "expo-checkbox";
 import React, { useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SecondaryObjective, secondaryObjectives } from "../../assets/ObjectivesData";
-import { usePointsContext } from "../Utilities/PointsContext";
+import DetailsOverlay from "./DetailsOverlay";
 
 interface ObjectivesInterfaceProps {
 	isYourPoints: boolean;
@@ -14,149 +14,33 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 	const [detailsOverlayVisible, setDetailsOverlayVisible] = useState(false);
 	const [activeObjectives, setActiveObjectives] = useState<SecondaryObjective[]>([]);
 	const [discardedObjectives, setDiscardedObjectives] = useState<SecondaryObjective[]>([]);
-	const { state, dispatch } = usePointsContext();
 	const [detailsTargetId, setDetailsTargetId] = useState(0);
+	const [currentDetailsObjective, setCurrentDetailsObjective] = useState<SecondaryObjective>(activeObjectives[0]);
 
 	const toggleMissionSelectMenu = () => {
 		setSelectOverlayVisible(!selectOverlayVisible);
 	};
 
 	const toggleDetailsOverlay = (objectiveId: number) => {
-		setDetailsTargetId(objectiveId);
+		const objective = activeObjectives.find((o) => o.id === objectiveId);
+		if (objective) setCurrentDetailsObjective(objective);
+		else return;
 
 		setDetailsOverlayVisible(!detailsOverlayVisible);
 	};
 
-	interface PointsInterFaceProps {
-		objective: SecondaryObjective;
-		subRuleIndex: number;
-	}
-
-	const DetailsOverlay = () => {
-		const currentDetailsObjective = activeObjectives.find((m) => m.id === detailsTargetId);
-
-		return (
-			<Overlay
-				overlayStyle={{ height: "auto", justifyContent: "center", padding: 30 }}
-				onBackdropPress={() => toggleDetailsOverlay(0)}
-				isVisible={detailsOverlayVisible}>
-				<View style={{ justifyContent: "center", alignItems: "center" }}>
-					<Text style={localStyles.mediumFont}>{currentDetailsObjective?.name}</Text>
-					<Text style={{ margin: 10 }}>{currentDetailsObjective?.objectiveRule}</Text>
-
-					<View>
-						{currentDetailsObjective?.subRules.map((subrule, index) => (
-							<View key={index} style={localStyles.subruleContainer}>
-								<View>
-									<Text style={{ fontSize: 16 }}>{subrule.title}</Text>
-									<Text style={{ fontStyle: "italic", color: "grey" }}>
-										Points per completion: {subrule.pointsPerCompletion}pts
-									</Text>
-								</View>
-								<View style={{ marginLeft: 10 }}>
-									<PointsInterface objective={currentDetailsObjective} subRuleIndex={index} />
-								</View>
-							</View>
-						))}
-					</View>
-				</View>
-			</Overlay>
-		);
-	};
-
-	// Buttons to increase points based on submissions
-	const PointsInterface = ({ objective, subRuleIndex }: PointsInterFaceProps) => {
-		const decreaseCumulativePoints = () => {
-			if (
-				typeof objective.subRules[subRuleIndex]?.cumulativeCount === "number" &&
-				objective.subRules[subRuleIndex]?.cumulativeCount !== 0
-			) {
-				objective.subRules[subRuleIndex].cumulativeCount = (objective.subRules[subRuleIndex].cumulativeCount ?? 0) - 1;
-				dispatch({
-					type: "SUBTRACT_POINTS",
-					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
-					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
-				});
-			}
-		};
-
-		const increaseCumulativePoints = () => {
-			if (typeof objective.subRules[subRuleIndex]?.cumulativeCount === "number") {
-				objective.subRules[subRuleIndex].cumulativeCount = (objective.subRules[subRuleIndex].cumulativeCount ?? 0) + 1;
-				dispatch({
-					type: "ADD_POINTS",
-					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
-					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
-				});
-			}
-		};
-
-		const toggleGainedPoints = () => {
-			setActiveObjectives(
-				activeObjectives.map((o) => {
-					if (o.id === objective.id) {
-						const copy = JSON.parse(JSON.stringify(o)) as SecondaryObjective;
-						copy.subRules[subRuleIndex].isChecked = !copy.subRules[subRuleIndex].isChecked;
-						return copy;
-					}
-
-					return o;
-				})
-			);
-
-			if (!objective.subRules[subRuleIndex].isChecked) {
-				dispatch({
-					type: "ADD_POINTS",
-					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
-					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
-				});
-			} else {
-				dispatch({
-					type: "SUBTRACT_POINTS",
-					payload: objective.subRules[subRuleIndex].pointsPerCompletion,
-					target: isYourPoints ? "YOUR_POINTS" : "OPPONENT_POINTS",
-				});
-			}
-		};
-
-		if (objective.isCumulative && objective.subRules[subRuleIndex]) {
-			if (!objective.subRules[subRuleIndex].cumulativeCount) {
-				objective.subRules[subRuleIndex].cumulativeCount = 0;
-			}
-
-			return (
-				<View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-					<View style={{ padding: 5 }}>
-						<Button title="-" onPress={decreaseCumulativePoints} />
-					</View>
-					<Text>{objective.subRules[subRuleIndex].cumulativeCount}</Text>
-					<View style={{ padding: 5 }}>
-						<Button title="+" onPress={increaseCumulativePoints} />
-					</View>
-				</View>
-			);
-		} else if (objective.subRules[subRuleIndex]) {
-			if (!objective.subRules[subRuleIndex].isChecked) {
-				objective.subRules[subRuleIndex].isChecked = false;
-			}
-
-			return (
-				<View style={{ padding: 5 }}>
-					<Checkbox value={objective.subRules[subRuleIndex].isChecked} onValueChange={toggleGainedPoints} />
-				</View>
-			);
-		}
-	};
+	// TODO: Fix mutated state for cumulative count
+	// TODO: Break out components to their own files and pass down callback methods to
+	// return data upwards in the parent / child tree
+	// TODO: Fix issue where more than one subRule is checkable at a given time
+	// TODO: Add turn system and Command Phase / EOT dialogue for discard
 
 	const discardObjective = (objective: SecondaryObjective) => {
 		const isActive = activeObjectives.some((m) => m.id === objective.id);
 
-		if (isActive) {
-			setActiveObjectives(activeObjectives.filter((m) => m.id !== objective.id));
-			setDiscardedObjectives([...discardedObjectives, objective]);
-		} else {
-			setDiscardedObjectives([...discardedObjectives, objective]);
-		}
+		if (isActive) setActiveObjectives(activeObjectives.filter((m) => m.id !== objective.id));
+
+		setDiscardedObjectives([...discardedObjectives, objective]);
 	};
 
 	const toggleActiveMission = (objective: SecondaryObjective) => {
@@ -265,7 +149,7 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 									justifyContent: "center",
 								}}>
 								<Button
-									title="R"
+									title="Reload"
 									disabled={!discardedObjectives.some((m) => m.id === objective.id)}
 									onPress={() => setDiscardedObjectives(discardedObjectives.filter((m) => m.id !== objective.id))}
 								/>
@@ -274,7 +158,14 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 					))}
 				</View>
 			</Overlay>
-			<DetailsOverlay />
+			<DetailsOverlay
+				objective={currentDetailsObjective}
+				detailsOverlayVisible={detailsOverlayVisible}
+				toggleDetailsOverlay={() => toggleDetailsOverlay}
+				isYourPoints={isYourPoints}
+				saveCheckBoxData={}
+				saveCountData={}
+			/>
 		</View>
 	);
 }
