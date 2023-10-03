@@ -3,6 +3,8 @@ import Checkbox from "expo-checkbox";
 import React, { useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SecondaryObjective, secondaryObjectives } from "../../assets/ObjectivesData";
+import { useActiveObjectives } from "../Utilities/ActiveObjectivesContext";
+import { useObjectiveDetails } from "../Utilities/ObjectiveDetailsContext";
 import DetailsOverlay from "./DetailsOverlay";
 
 interface ObjectivesInterfaceProps {
@@ -11,22 +13,30 @@ interface ObjectivesInterfaceProps {
 
 export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfaceProps) {
 	const [selectOverlayVisible, setSelectOverlayVisible] = useState(false);
-	const [detailsOverlayVisible, setDetailsOverlayVisible] = useState(false);
-	const [activeObjectives, setActiveObjectives] = useState<SecondaryObjective[]>([]);
 	const [discardedObjectives, setDiscardedObjectives] = useState<SecondaryObjective[]>([]);
 	const [detailsTargetId, setDetailsTargetId] = useState(0);
-	const [currentDetailsObjective, setCurrentDetailsObjective] = useState<SecondaryObjective>(activeObjectives[0]);
+	const { toggleDetailsOverlayVisible } = useObjectiveDetails();
+	const { activeObjectives, toggleActiveObjective, removeActiveObjective } = useActiveObjectives();
+
+	const emptySecondaryObjective: SecondaryObjective = {
+		id: 0,
+		name: "",
+		objectiveRule: "",
+		isCumulative: false,
+		subRules: [],
+	};
+	const [currentDetailsObjective, setCurrentDetailsObjective] = useState<SecondaryObjective>(emptySecondaryObjective);
 
 	const toggleMissionSelectMenu = () => {
 		setSelectOverlayVisible(!selectOverlayVisible);
 	};
 
-	const toggleDetailsOverlay = (objectiveId: number) => {
+	const activateDetailsOverlay = (objectiveId: number) => {
 		const objective = activeObjectives.find((o) => o.id === objectiveId);
 		if (objective) setCurrentDetailsObjective(objective);
-		else return;
 
-		setDetailsOverlayVisible(!detailsOverlayVisible);
+		console.log("toggling");
+		toggleDetailsOverlayVisible();
 	};
 
 	// TODO: Fix mutated state for cumulative count
@@ -38,19 +48,9 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 	const discardObjective = (objective: SecondaryObjective) => {
 		const isActive = activeObjectives.some((m) => m.id === objective.id);
 
-		if (isActive) setActiveObjectives(activeObjectives.filter((m) => m.id !== objective.id));
+		if (isActive) removeActiveObjective(objective.id);
 
 		setDiscardedObjectives([...discardedObjectives, objective]);
-	};
-
-	const toggleActiveMission = (objective: SecondaryObjective) => {
-		const isActive = activeObjectives.some((m) => m.id === objective.id);
-
-		if (!isActive && activeObjectives.length < 3) {
-			setActiveObjectives([...activeObjectives, objective]);
-		} else {
-			setActiveObjectives(activeObjectives.filter((m) => m.id !== objective.id));
-		}
 	};
 
 	//TODO: Filter out non avaliable items and random with avaliable
@@ -63,7 +63,7 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 
 			if (random) {
 				if (!discardedObjectives.some((m) => m.id === random.id) && !activeObjectives.some((m) => m.id === random.id)) {
-					toggleActiveMission(random);
+					toggleActiveObjective(random);
 					break;
 				} else {
 					if (i > 20) break;
@@ -80,7 +80,7 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 			</View>
 			<View style={localStyles.objectiveView}>
 				{activeObjectives.map((objective, index) => (
-					<TouchableOpacity key={index} style={localStyles.objectiveEntry} onPress={() => toggleDetailsOverlay(objective.id)}>
+					<TouchableOpacity key={index} style={localStyles.objectiveEntry} onPress={() => activateDetailsOverlay(objective.id)}>
 						<Text style={[localStyles.mediumFont, { paddingHorizontal: 20 }]}>{objective.name}</Text>
 						<Button title="DISCARD" onPress={() => discardObjective(objective)} />
 					</TouchableOpacity>
@@ -121,7 +121,7 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 							}}>
 							<TouchableOpacity
 								disabled={discardedObjectives.some((m) => m.id === objective.id)}
-								onPress={() => toggleActiveMission(objective)}
+								onPress={() => toggleActiveObjective(objective)}
 								style={{
 									flexDirection: "row",
 									padding: 10,
@@ -132,7 +132,7 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 									color="#2296f3"
 									disabled={discardedObjectives.some((m) => m.id === objective.id)}
 									value={activeObjectives.some((m) => m.id === objective.id)}
-									onValueChange={() => toggleActiveMission(objective)}
+									onValueChange={() => toggleActiveObjective(objective)}
 								/>
 								<Text
 									style={{
@@ -158,14 +158,7 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 					))}
 				</View>
 			</Overlay>
-			<DetailsOverlay
-				objective={currentDetailsObjective}
-				detailsOverlayVisible={detailsOverlayVisible}
-				toggleDetailsOverlay={() => toggleDetailsOverlay}
-				isYourPoints={isYourPoints}
-				saveCheckBoxData={}
-				saveCountData={}
-			/>
+			<DetailsOverlay objective={currentDetailsObjective} isYourPoints={isYourPoints} />
 		</View>
 	);
 }

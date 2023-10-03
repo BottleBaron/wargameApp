@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Counter from "../Components/Counter";
 import ObjectivesInterface from "../Components/ObjectivesInterface";
+import { ActiveObjectivesProvider } from "../Utilities/ActiveObjectivesContext";
+import { ObjectivesDetailsProvider } from "../Utilities/ObjectiveDetailsContext";
 import { usePointsContext } from "../Utilities/PointsContext";
 
 export default function PointsCounterPage() {
@@ -86,7 +88,11 @@ export default function PointsCounterPage() {
 				</View>
 				<Counter title="Command Points" isPointsCounter={[false, false]} />
 				<Counter title="Objective Points" isPointsCounter={[true, true]} />
-				<ObjectivesInterface isYourPoints={true} />
+				<ActiveObjectivesProvider>
+					<ObjectivesDetailsProvider>
+						<ObjectivesInterface isYourPoints={true} />
+					</ObjectivesDetailsProvider>
+				</ActiveObjectivesProvider>
 			</View>
 			<View style={localStyles.pageLayout}>
 				<View style={localStyles.headerText}>
@@ -94,7 +100,11 @@ export default function PointsCounterPage() {
 				</View>
 				<Counter title="Command Points" isPointsCounter={[false, false]} />
 				<Counter title="Objective Points" isPointsCounter={[true, false]} />
-				<ObjectivesInterface isYourPoints={false} />
+				<ActiveObjectivesProvider>
+					<ObjectivesDetailsProvider>
+						<ObjectivesInterface isYourPoints={false} />
+					</ObjectivesDetailsProvider>
+				</ActiveObjectivesProvider>
 			</View>
 		</View>
 	);

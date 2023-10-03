@@ -1,25 +1,37 @@
 import Checkbox from "expo-checkbox";
+import { useState } from "react";
 import { Button, Text, View } from "react-native";
 import { SecondaryObjective } from "../../assets/ObjectivesData";
+import { useActiveObjectives } from "../Utilities/ActiveObjectivesContext";
 import { usePointsContext } from "../Utilities/PointsContext";
 
 interface PointsInterFaceProps {
 	objective: SecondaryObjective;
 	subRuleIndex: number;
 	isYourPoints: boolean;
-	saveCheckboxData: () => void;
-	saveCountData: () => void;
 }
 
-export default function PointsInterface({ objective, subRuleIndex, isYourPoints, saveCheckboxData, saveCountData }: PointsInterFaceProps) {
+export default function PointsInterface({ objective, subRuleIndex, isYourPoints }: PointsInterFaceProps) {
 	const { dispatch } = usePointsContext();
+	const { updateActiveObjective } = useActiveObjectives();
+	const [clone, setClone] = useState(JSON.parse(JSON.stringify(objective)) as SecondaryObjective);
 
 	const decreaseCumulativePoints = () => {
-		if (
-			typeof objective.subRules[subRuleIndex]?.cumulativeCount === "number" &&
-			objective.subRules[subRuleIndex]?.cumulativeCount !== 0
-		) {
-			saveCountData();
+		if (typeof clone.subRules[subRuleIndex]?.cumulativeCount === "number" && clone.subRules[subRuleIndex]?.cumulativeCount !== 0) {
+			setClone((prevClone) => ({
+				...prevClone,
+				subRules: prevClone.subRules.map((subRule, index) => {
+					if (index === subRuleIndex) {
+						return {
+							...subRule,
+							cumulativeCount: (subRule.cumulativeCount ?? 0) - 1,
+						};
+					}
+					return subRule;
+				}),
+			}));
+			updateActiveObjective(clone);
+
 			dispatch({
 				type: "SUBTRACT_POINTS",
 				payload: objective.subRules[subRuleIndex].pointsPerCompletion,
@@ -29,8 +41,21 @@ export default function PointsInterface({ objective, subRuleIndex, isYourPoints,
 	};
 
 	const increaseCumulativePoints = () => {
-		if (typeof objective.subRules[subRuleIndex]?.cumulativeCount === "number") {
-			saveCountData();
+		if (typeof clone.subRules[subRuleIndex]?.cumulativeCount === "number") {
+			setClone((prevClone) => ({
+				...prevClone,
+				subRules: prevClone.subRules.map((subRule, index) => {
+					if (index === subRuleIndex) {
+						return {
+							...subRule,
+							cumulativeCount: (subRule.cumulativeCount ?? 0) + 1,
+						};
+					}
+					return subRule;
+				}),
+			}));
+			updateActiveObjective(clone);
+
 			dispatch({
 				type: "ADD_POINTS",
 				payload: objective.subRules[subRuleIndex].pointsPerCompletion,
@@ -40,21 +65,11 @@ export default function PointsInterface({ objective, subRuleIndex, isYourPoints,
 	};
 
 	const toggleGainedPoints = () => {
-		// setActiveObjectives(
-		// 	activeObjectives.map((o) => {
-		// 		if (o.id === objective.id) {
-		// 			const copy = JSON.parse(JSON.stringify(o)) as SecondaryObjective;
-		// 			copy.subRules[subRuleIndex].isChecked = !copy.subRules[subRuleIndex].isChecked;
-		// 			return copy;
-		// 		}
+		clone.subRules[subRuleIndex].isChecked = !clone.subRules[subRuleIndex].isChecked;
+		setClone(clone);
+		updateActiveObjective(clone);
 
-		// 		return o;
-		// 	})
-		// );
-
-		saveCheckboxData();
-
-		if (!objective.subRules[subRuleIndex].isChecked) {
+		if (clone.subRules[subRuleIndex].isChecked) {
 			dispatch({
 				type: "ADD_POINTS",
 				payload: objective.subRules[subRuleIndex].pointsPerCompletion,
@@ -70,8 +85,8 @@ export default function PointsInterface({ objective, subRuleIndex, isYourPoints,
 	};
 
 	if (objective.isCumulative && objective.subRules[subRuleIndex]) {
-		if (!objective.subRules[subRuleIndex].cumulativeCount) {
-			objective.subRules[subRuleIndex].cumulativeCount = 0;
+		if (!clone.subRules[subRuleIndex].cumulativeCount) {
+			clone.subRules[subRuleIndex].cumulativeCount = 0;
 		}
 
 		return (
@@ -79,20 +94,20 @@ export default function PointsInterface({ objective, subRuleIndex, isYourPoints,
 				<View style={{ padding: 5 }}>
 					<Button title="-" onPress={decreaseCumulativePoints} />
 				</View>
-				<Text>{objective.subRules[subRuleIndex].cumulativeCount}</Text>
+				<Text>{clone.subRules[subRuleIndex].cumulativeCount}</Text>
 				<View style={{ padding: 5 }}>
 					<Button title="+" onPress={increaseCumulativePoints} />
 				</View>
 			</View>
 		);
-	} else if (objective.subRules[subRuleIndex]) {
-		if (!objective.subRules[subRuleIndex].isChecked) {
-			objective.subRules[subRuleIndex].isChecked = false;
+	} else if (clone.subRules[subRuleIndex]) {
+		if (!clone.subRules[subRuleIndex].isChecked) {
+			clone.subRules[subRuleIndex].isChecked = false;
 		}
 
 		return (
 			<View style={{ padding: 5 }}>
-				<Checkbox value={objective.subRules[subRuleIndex].isChecked} onValueChange={toggleGainedPoints} />
+				<Checkbox value={clone.subRules[subRuleIndex].isChecked} onValueChange={toggleGainedPoints} />
 			</View>
 		);
 	}
