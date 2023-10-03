@@ -14,7 +14,6 @@ interface ObjectivesInterfaceProps {
 export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfaceProps) {
 	const [selectOverlayVisible, setSelectOverlayVisible] = useState(false);
 	const [discardedObjectives, setDiscardedObjectives] = useState<SecondaryObjective[]>([]);
-	const [detailsTargetId, setDetailsTargetId] = useState(0);
 	const { toggleDetailsOverlayVisible } = useObjectiveDetails();
 	const { activeObjectives, toggleActiveObjective, removeActiveObjective } = useActiveObjectives();
 
@@ -35,13 +34,9 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 		const objective = activeObjectives.find((o) => o.id === objectiveId);
 		if (objective) setCurrentDetailsObjective(objective);
 
-		console.log("toggling");
 		toggleDetailsOverlayVisible();
 	};
 
-	// TODO: Fix mutated state for cumulative count
-	// TODO: Break out components to their own files and pass down callback methods to
-	// return data upwards in the parent / child tree
 	// TODO: Fix issue where more than one subRule is checkable at a given time
 	// TODO: Add turn system and Command Phase / EOT dialogue for discard
 
