@@ -253,7 +253,7 @@ export const secondaryObjectives: SecondaryObjective[] = [
         ],
     },
     {
-        id: 14,
+        id: 15,
         name: 'Storm Hostile Objective',
         objectiveRule: 'Scored at the end of your turn\n(Cannot be drawn first turn)',
         isCumulative: false,

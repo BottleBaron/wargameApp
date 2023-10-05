@@ -48,23 +48,18 @@ export default function ObjectivesInterface({ isYourPoints }: ObjectivesInterfac
 		setDiscardedObjectives([...discardedObjectives, objective]);
 	};
 
-	//TODO: Filter out non avaliable items and random with avaliable
-	// Generates three random objectives
 	const randomizeObjectives = () => {
-		let i = 0;
-		while (true) {
-			const randomIndex = Math.floor(Math.random() * secondaryObjectives.length) + 1;
-			const random = secondaryObjectives.find((o) => o.id === randomIndex);
+		let availableObjectives = secondaryObjectives.filter((objective) => {
+			if (!activeObjectives.includes(objective) && !discardedObjectives.includes(objective)) return true;
+			else return false;
+		});
+		console.log(availableObjectives);
 
-			if (random) {
-				if (!discardedObjectives.some((m) => m.id === random.id) && !activeObjectives.some((m) => m.id === random.id)) {
-					toggleActiveObjective(random);
-					break;
-				} else {
-					if (i > 20) break;
-					else i++;
-				}
-			}
+		const randomIndex = Math.floor(Math.random() * availableObjectives.length) + 1;
+		const random = availableObjectives[randomIndex];
+
+		if (random && activeObjectives.length < 3) {
+			toggleActiveObjective(random);
 		}
 	};
 

@@ -10,7 +10,7 @@ import { usePointsContext } from "../Utilities/PointsContext";
 
 export default function PointsCounterPage() {
 	useKeepAwake();
-	const { state, dispatch } = usePointsContext();
+	const { state } = usePointsContext();
 	const [usingWTCScoring, setUsingWTCScoring] = useState(false);
 	const [displayPoints, setDisplayPoints] = useState<number[]>([]);
 
