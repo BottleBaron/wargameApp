@@ -30,8 +30,8 @@ Appen innehåller två sidor:
 -   [x] React Navigation används för att skapa en bättre upplevelse i appen.
 -   [x] Git & GitHub har använts
 -   [x] Projektmappen innehåller en README.md fil - (läs ovan för mer info)
--   [] Uppgiften lämnas in i tid!
--   [] Muntlig presentation är genomförd
+-   [x] Uppgiften lämnas in i tid!
+-   [x] Muntlig presentation är genomförd
 
 #### RN-Komponenter
 
